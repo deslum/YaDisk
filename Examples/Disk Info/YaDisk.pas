@@ -127,7 +127,7 @@ begin
     end;
   except
     on E : Exception do
-      ShowMessage(E.ClassName+' поднята ошибка, с сообщением : '+E.Message);
+      ShowMessage(E.ClassName+' '+E.Message);
   end;
 end;
 
