@@ -103,9 +103,9 @@ end;
 
 {$REGION 'TYaDisk'}
 
-constructor TYaDsk.Create(Login:String;Password:String);
+constructor TYaDisk.Create(Login:String;Pass:String);
 begin
-  http:=TWebDav.Create;
+  self.http:=TWDav.Create;
   ssl:=TIdSSLIOHandlerSocketOpenSSL.Create;
   with SSL.SSLOptions do
   begin
@@ -114,16 +114,19 @@ begin
     VerifyMode:=[];
     VerifyDepth:=0;
   end;
-
   ssl.Host:=String.Empty;
   http.IOHandler:=ssl;
-
-  with http.Request do
-  begin
-    UserAgent:=USERAGENT;
-    BasicAuthentication:=true;
-    Username:=Login;
-    Password:=Password;
+  try
+    with self.http.Request do
+    begin
+      UserAgent:=USERAGENT;
+      BasicAuthentication:=true;
+      Username:=Login;
+      Password:=Pass;
+    end;
+  except
+    on E : Exception do
+      ShowMessage(E.ClassName+' '+E.Message);
   end;
 end;
 
