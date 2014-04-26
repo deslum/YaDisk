@@ -1,4 +1,4 @@
-unit YaDsk;
+unit YaDisk;
 
 interface
 
@@ -10,7 +10,7 @@ uses
 
 
 type
-  TWebDav = class(TIdHTTP)
+  TWDav = class(TIdHTTP)
   public
     procedure MkCol(AURL: string);
     procedure Copy(AURL:String);
@@ -19,13 +19,13 @@ type
 end;
 
 type
-  TYaDsk = class(TWebDav)
+  TYaDisk = class(TWDav)
   private
-    Http:       TWebDav;
+    Http:       TWDav;
     Ssl:        TIdSSLIOHandlerSocketOpenSSL;
     function    RegEx(Str:String;Expression:string):string;
   public
-    constructor Create(Login:String;Password:String);
+    constructor Create(Login:String;Pass:String);
     destructor  Destroy;
     procedure   Put(FileName:String);
     procedure   Get(FileName:String);
@@ -57,8 +57,9 @@ procedure Register;
 
 implementation
 
-{$REGION 'TWebDav'}
-function TYaDsk.RegEx(Str:String;Expression: String):String;
+{$REGION 'TWDav'}
+
+function TYaDisk.RegEx(Str:String;Expression: String):String;
 var
   Reg:TRegEx;
 begin
@@ -67,22 +68,22 @@ begin
     Result:=Reg.Match(Str).Value;
 end;
 
-procedure TWebDav.MkCol(AURL: string);
+procedure TWDav.MkCol(AURL: string);
 begin
   DoRequest(Id_HTTPMethodMkCol, AURL, nil, nil, []);
 end;
 
-procedure TWebdav.Copy(AURL: string);
+procedure TWdav.Copy(AURL: string);
 begin
   DoRequest(Id_HTTPMethodCopy, AURL, nil, nil, []);
 end;
 
-procedure TWebdav.Move(AURL: string);
+procedure TWdav.Move(AURL: string);
 begin
   DoRequest(Id_HTTPMethodMove, AURL, nil, nil, []);
 end;
 
-function TWebdav.Prop(HttpMethod:String;AURL: string;  ASource:TStrings):string;
+function TWdav.Prop(HttpMethod:String;AURL: string;  ASource:TStrings):string;
 var
   LResponse, Source: TMemoryStream;
 begin
@@ -130,13 +131,13 @@ begin
   end;
 end;
 
-destructor TYaDsk.Destroy;
+destructor TYaDisk.Destroy;
 begin
   FreeAndNil(http);
   FreeAndNil(ssl);
 end;
 
-function TYaDsk.GetLogin:String;
+function TYaDisk.GetLogin:String;
 begin
   with http.Request do
   begin
@@ -146,7 +147,7 @@ begin
   Result:=http.Get(YaURL+'?userinfo');
 end;
 
-procedure TYaDsk.Put(FileName: string);
+procedure TYaDisk.Put(FileName: string);
 var
 Stream:TFileStream;
 begin
@@ -161,7 +162,7 @@ begin
   Stream.Free;
 end;
 
-procedure TYaDsk.Get(FileName: string);
+procedure TYaDisk.Get(FileName: string);
 var
   Stream:TStream;
 begin
@@ -171,18 +172,18 @@ begin
 end;
 
 
-procedure TYaDsk.MkCol(AURL: string);
+procedure TYaDisk.MkCol(AURL: string);
 begin
   http.Request.Accept:='*/*';
   http.MkCol(YaURL+Aurl);
 end;
 
-procedure TYaDsk.Delete(ObjectName: string);
+procedure TYaDisk.Delete(ObjectName: string);
 begin
   http.Delete(YaURL+ObjectName);
 end;
 
-procedure TYaDsk.Copy(inPath: string; outPath: string);
+procedure TYaDisk.Copy(inPath: string; outPath: string);
 begin
  with http.Request do
   begin
@@ -192,7 +193,7 @@ begin
   http.Copy(YaURL+outPath);
 end;
 
-procedure TYaDsk.Move(inPath: string; outPath: string);
+procedure TYaDisk.Move(inPath: string; outPath: string);
 begin
  with http.Request do
   begin
@@ -202,10 +203,11 @@ begin
   http.Move(YaURL+outPath);
 end;
 
-procedure TYaDsk.GetSpaceDisk(var Available: String; var Used: String);
+procedure TYaDisk.GetSpaceDisk(var Available: String; var Used: String);
 var
   Answer:String;
   Stream:TStringList;
+  Reg,Reg1:TRegex;
  begin
   Stream:=TStringList.Create;
   Stream.Add('<D:propfind xmlns:D="DAV:">');
@@ -220,12 +222,14 @@ var
       CustomHeaders.AddValue('Depth','0');
     end;
   Answer:=http.Prop(Id_HTTPMethodPropFind,YaURL,Stream);
-  Available:= Regex(Answer,'<d:quota-available-bytes>(.*?)</d:quota-available-bytes>');
-  Used := Regex(Answer,'<d:quota-used-bytes>(.*?)</d:quota-used-bytes>');
+  Reg:= TRegex.Create('[\d]{6,}');
+  if reg.IsMatch(Answer) then
+    Used:=reg.Matches(Answer).Item[0].Value;
+    Available:=reg.Matches(Answer).Item[1].Value;
   FreeAndNil(Stream);
 end;
 
-procedure TYaDsk.Folder(FolderName: string;Depth:integer);
+procedure TYaDisk.Folder(FolderName: string;Depth:integer);
 var
   Answer:AnsiString;
  begin
@@ -238,7 +242,7 @@ var
   showmessage(answer);
 end;
 
-procedure TYadsk.GetProperties(ObjectName: string);
+procedure TYaDisk.GetProperties(ObjectName: string);
 var
   Answer:String;
   Stream:TStringList;
@@ -259,11 +263,10 @@ var
     end;
   Answer:=http.Prop(Id_HTTPMethodPropFind,YaURL+ObjectName,Stream);
   showmessage(answer);
-  //Regex(Answer,'<public_url xmlns="urn:yandex:disk:meta">(.*?)</public_url>');
   FreeAndNil(Stream);
 end;
 
-function TYaDsk.Share(FileName: string; Open: Boolean = True):String;
+function TYaDisk.Share(FileName: string; Open: Boolean = True):String;
 var
   Answer:String;
   Stream:TStringList;
@@ -282,11 +285,11 @@ var
       ContentLength         :=Length(stream.GetText);
     end;
   Answer:=http.Prop(Id_HTTPMethodPropPatch,YaURL+FileName,Stream);
-  Result:= Regex(Answer,'<public_url xmlns="urn:yandex:disk:meta">(.*?)</public_url>');
+  Result:= Regex(Answer,'http://[a-z./0-9A-Z]+');
   FreeAndNil(Stream);
 end;
 
-function TYaDsk.IsShare(FileName: string):boolean;
+function TYaDisk.IsShare(FileName: string):boolean;
 var
   Answer,Res:String;
   Stream:TStringList;
@@ -304,8 +307,11 @@ var
       ContentLength         :=Length(stream.GetText);
     end;
   Answer:=http.Prop(Id_HTTPMethodPropFind,YaURL+FileName,Stream);
-  Res:= Regex(Answer,'<d:status>(.*?)</d:status>');
-  showmessage(res);
+  Res:= Regex(Answer,'OK');
+  if Res='' then
+    result:=false
+  else
+    result:=true;
   FreeAndNil(Stream);
 end;
 
@@ -313,7 +319,7 @@ end;
 
 procedure Register;
 begin
-  RegisterComponents('YaDsk', [TYaDsk]);
+  RegisterComponents('YaDisk', [TYaDisk]);
 end;
 
 end.
