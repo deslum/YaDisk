@@ -5,8 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, Data.DB, Data.Win.ADODB,idHttp,idSSl,
   IdSSLOpenSSL,IdIOHandler,RegularExpressionsAPI,RegularExpressionsCore,
-  RegularExpressionsConsts,RegularExpressions,idGlobalProtocols,idGlobal,
-  vcl.dialogs;
+  RegularExpressionsConsts,RegularExpressions,idGlobalProtocols,idGlobal;
 
 
 type
@@ -45,7 +44,7 @@ const
 
 USERAGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:25.0) Gecko/20100101 Firefox/25.0';
 YaURL = 'https://webdav.yandex.ru/';
-ApplicationName = 'YaDisk DelphiSDK/0.0.1';
+ApplicationName = 'YaDisk DelphiSDK/0.0.1 nightly';
 Id_HTTPMethodMkCol = 'MKCOL';
 Id_HTTPMethodCopy = 'COPY';
 Id_HTTPMethodMove = 'MOVE';
@@ -127,7 +126,7 @@ begin
     end;
   except
     on E : Exception do
-      ShowMessage(E.ClassName+' '+E.Message);
+      writeln(E.ClassName+' '+E.Message);
   end;
 end;
 
@@ -211,10 +210,10 @@ var
  begin
   Stream:=TStringList.Create;
   Stream.Add('<D:propfind xmlns:D="DAV:">');
-  Stream.Add('  <D:prop>');
-  Stream.Add('    <D:quota-available-bytes/>');
-  Stream.Add('    <D:quota-used-bytes/>');
-  Stream.Add('  </D:prop>');
+  Stream.Add('<D:prop>');
+  Stream.Add('<D:quota-available-bytes/>');
+  Stream.Add('<D:quota-used-bytes/>');
+  Stream.Add('</D:prop>');
   Stream.Add('</D:propfind>');
   with http.Request do
     begin
