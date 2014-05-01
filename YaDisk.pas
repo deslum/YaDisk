@@ -23,21 +23,21 @@ type
   private
     Http:       TWDav;
     Ssl:        TIdSSLIOHandlerSocketOpenSSL;
-    function    RegEx(Str:String;Expression:string):string;
+    function    RegEx(Str:String;Expression:String):String;
   public
     constructor Create(Login:String;Pass:String);
     destructor  Destroy;
     procedure   Put(FileName:String);
     procedure   Get(FileName:String);
     procedure   Delete(ObjectName:String);
-    procedure   MkCol(AURL: string);
-    procedure   Copy(inPath,outPath:String);
-    procedure   Folder(FolderName:String;Depth:integer);
-    procedure   Move(inPath,outPath:String);
+    procedure   MkCol(AURL: String);
+    procedure   Copy(InPath,OutPath:String);
+    procedure   Folder(FolderName:String;Depth:Integer);
+    procedure   Move(InPath,OutPath:String);
     procedure   GetSpaceDisk(var Available: String; var Used: String);
     procedure   GetProperties(ObjectName:String);
     function    Share(FileName:String;Open:Boolean = true):String;
-    function    IsShare(FileName:String): boolean;
+    function    IsShare(FileName:String): Boolean;
     function    GetLogin():String;
   end;
 
@@ -73,17 +73,17 @@ begin
   DoRequest(Id_HTTPMethodMkCol, AURL, nil, nil, []);
 end;
 
-procedure TWdav.Copy(AURL: string);
+procedure TWdav.Copy(AURL: String);
 begin
   DoRequest(Id_HTTPMethodCopy, AURL, nil, nil, []);
 end;
 
-procedure TWdav.Move(AURL: string);
+procedure TWdav.Move(AURL: String);
 begin
   DoRequest(Id_HTTPMethodMove, AURL, nil, nil, []);
 end;
 
-function TWdav.Prop(HttpMethod:String;AURL: string;  ASource:TStrings):string;
+function TWdav.Prop(HttpMethod:String;AURL: String;  ASource:TStrings):String;
 var
   LResponse, Source: TMemoryStream;
 begin
@@ -110,18 +110,18 @@ begin
   ssl:=TIdSSLIOHandlerSocketOpenSSL.Create;
   with SSL.SSLOptions do
   begin
-    Method:=sslvSSLv3;
+    Method:=SslvSSLv3;
     Mode:=sslmUnassigned;
     VerifyMode:=[];
     VerifyDepth:=0;
   end;
   ssl.Host:=String.Empty;
-  http.IOHandler:=ssl;
+  http.IOHandler:=Ssl;
   try
-    with self.http.Request do
+    with Self.Http.Request do
     begin
       UserAgent:=USERAGENT;
-      BasicAuthentication:=true;
+      BasicAuthentication:=True;
       Username:=Login;
       Password:=Pass;
     end;
@@ -133,75 +133,77 @@ end;
 
 destructor TYaDisk.Destroy;
 begin
-  FreeAndNil(http);
-  FreeAndNil(ssl);
+  FreeAndNil(Http);
+  FreeAndNil(Ssl);
 end;
 
 function TYaDisk.GetLogin:String;
 begin
-  with http.Request do
+  with Http.Request do
   begin
     UserAgent:=USERAGENT;
     Accept:='*/*';
   end;
-  Result:=http.Get(YaURL+'?userinfo');
+  Result:=Http.Get(YaURL+'?userinfo');
 end;
 
-procedure TYaDisk.Put(FileName: string);
+procedure TYaDisk.Put(FileName: String);
 var
-Stream:TFileStream;
+  Stream:TFileStream;
 begin
   Stream:=TFileStream.Create(Filename,fmOpenRead);
   with http.Request do
   begin
     CustomHeaders.AddValue('Expect','100-continue');
     ContentType:='application/binary';
-    ContentLength:=stream.Size;
+    ContentLength:=Stream.Size;
   end;
-  http.put(YaURL+Filename,stream);
+  Http.Put(YaURL+Filename,Stream);
   Stream.Free;
 end;
 
-procedure TYaDisk.Get(FileName: string);
+procedure TYaDisk.Get(FileName: String);
 var
   Stream:TStream;
 begin
   Stream:=TFileStream.Create(Filename,fmcreate);
-  http.get(YaURL+Filename,stream);
-  stream.Free;
+  Http.Get(YaURL+Filename,stream);
+  Stream.Free;
 end;
 
 
-procedure TYaDisk.MkCol(AURL: string);
+procedure TYaDisk.MkCol(AURL: String);
 begin
-  http.Request.Accept:='*/*';
-  http.MkCol(YaURL+Aurl);
+  Http.Request.Accept:='*/*';
+  Http.MkCol(YaURL+Aurl);
 end;
 
-procedure TYaDisk.Delete(ObjectName: string);
+procedure TYaDisk.Delete(ObjectName: String);
 begin
-  http.Delete(YaURL+ObjectName);
+  Http.Delete(YaURL+ObjectName);
 end;
 
-procedure TYaDisk.Copy(inPath: string; outPath: string);
+procedure TYaDisk.Copy(InPath: String; OutPath: String);
 begin
- with http.Request do
+ with Http.Request do
   begin
     Accept:='*/*';
-    CustomHeaders.AddValue('Destination','/'+inPath);
+    CustomHeaders.AddValue('Destination','/'+InPath);
   end;
-  http.Copy(YaURL+outPath);
+  Http.Copy(YaURL+OutPath);
 end;
 
-procedure TYaDisk.Move(inPath: string; outPath: string);
+procedure TYaDisk.Move(InPath: String; OutPath: String);
 begin
- with http.Request do
+ with Http.Request do
   begin
     Accept:='*/*';
-    CustomHeaders.AddValue('Destination','/'+inPath);
+    CustomHeaders.AddValue('Destination','/'+InPath);
   end;
-  http.Move(YaURL+outPath);
+  Http.Move(YaURL+OutPath);
 end;
+
+//========//
 
 procedure TYaDisk.GetSpaceDisk(var Available: String; var Used: String);
 var
