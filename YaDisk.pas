@@ -12,7 +12,7 @@ uses
 type
   TWDav = class(TIdHTTP)
   public
-    procedure MkCol(AURL: string);
+    procedure MkCol(AURL: String);
     procedure Copy(AURL:String);
     procedure Move(AURL:String);
     function Prop(HttpMethod:String;AURL:String;ASource:TStrings):String;
@@ -203,8 +203,6 @@ begin
   Http.Move(YaURL+OutPath);
 end;
 
-//========//
-
 procedure TYaDisk.GetSpaceDisk(var Available: String; var Used: String);
 var
   Answer:String;
@@ -213,10 +211,10 @@ var
  begin
   Stream:=TStringList.Create;
   Stream.Add('<D:propfind xmlns:D="DAV:">');
-  Stream.Add('  <D:prop>');
-  Stream.Add('    <D:quota-available-bytes/>');
-  Stream.Add('    <D:quota-used-bytes/>');
-  Stream.Add('  </D:prop>');
+  Stream.Add('<D:prop>');
+  Stream.Add('<D:quota-available-bytes/>');
+  Stream.Add('<D:quota-used-bytes/>');
+  Stream.Add('</D:prop>');
   Stream.Add('</D:propfind>');
   with http.Request do
     begin
@@ -226,25 +224,25 @@ var
   Answer:=http.Prop(Id_HTTPMethodPropFind,YaURL,Stream);
   Reg:= TRegex.Create('[\d]{6,}');
   if reg.IsMatch(Answer) then
-    Used:=reg.Matches(Answer).Item[0].Value;
-    Available:=reg.Matches(Answer).Item[1].Value;
+    Used:=Reg.Matches(Answer).Item[0].Value;
+    Available:=Reg.Matches(Answer).Item[1].Value;
   FreeAndNil(Stream);
 end;
 
-procedure TYaDisk.Folder(FolderName: string;Depth:integer);
+procedure TYaDisk.Folder(FolderName: String;Depth:Integer);
 var
   Answer:AnsiString;
  begin
-  with http.Request do
+  with Http.Request do
     begin
       Accept:=  '*/*';
       CustomHeaders.AddValue('Depth',IntToStr(Depth));
     end;
-  Answer:=http.Prop(Id_HTTPMethodPropFind,YaURL,nil);
-  showmessage(answer);
+  Answer:=Http.Prop(Id_HTTPMethodPropFind,YaURL,nil);
+  showmessage(Answer);
 end;
 
-procedure TYaDisk.GetProperties(ObjectName: string);
+procedure TYaDisk.GetProperties(ObjectName: String);
 var
   Answer:String;
   Stream:TStringList;
@@ -256,7 +254,7 @@ var
   Stream.Add('<myprop xmlns="mynamespace"/>');
   Stream.Add('</prop>');
   Stream.Add('</propfind>');
-  with http.Request do
+  with Http.Request do
     begin
       Accept              := '*/*';
       CustomHeaders.AddValue('Depth','1');
@@ -264,11 +262,11 @@ var
       ContentType         :='application/x-www-form-urlencoded';
     end;
   Answer:=http.Prop(Id_HTTPMethodPropFind,YaURL+ObjectName,Stream);
-  showmessage(answer);
+  showmessage(Answer);
   FreeAndNil(Stream);
 end;
 
-function TYaDisk.Share(FileName: string; Open: Boolean = True):String;
+function TYaDisk.Share(FileName: String; Open: Boolean = True):String;
 var
   Answer:String;
   Stream:TStringList;
@@ -281,17 +279,17 @@ var
   Stream.Add('</prop>');
   Stream.Add('</set>');
   Stream.Add('</propertyupdate>');
-  with http.Request do
+  with Http.Request do
     begin
       UserAgent             :=ApplicationName;
-      ContentLength         :=Length(stream.GetText);
+      ContentLength         :=Length(Stream.GetText);
     end;
   Answer:=http.Prop(Id_HTTPMethodPropPatch,YaURL+FileName,Stream);
   Result:= Regex(Answer,'http://[a-z./0-9A-Z]+');
   FreeAndNil(Stream);
 end;
 
-function TYaDisk.IsShare(FileName: string):boolean;
+function TYaDisk.IsShare(FileName: String):boolean;
 var
   Answer,Res:String;
   Stream:TStringList;
@@ -302,18 +300,18 @@ var
   Stream.Add('<public_url xmlns="urn:yandex:disk:meta"/>');
   Stream.Add('</prop>');
   Stream.Add('</propfind>');
-  with http.Request do
+  with Http.Request do
     begin
       UserAgent             :=ApplicationName;
       CustomHeaders.AddValue('Depth','0');
-      ContentLength         :=Length(stream.GetText);
+      ContentLength         :=Length(Stream.GetText);
     end;
-  Answer:=http.Prop(Id_HTTPMethodPropFind,YaURL+FileName,Stream);
+  Answer:=Http.Prop(Id_HTTPMethodPropFind,YaURL+FileName,Stream);
   Res:= Regex(Answer,'OK');
   if Res='' then
-    result:=false
+    Result:=False
   else
-    result:=true;
+    Result:=True;
   FreeAndNil(Stream);
 end;
 
