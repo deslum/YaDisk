@@ -110,7 +110,7 @@ begin
   ssl:=TIdSSLIOHandlerSocketOpenSSL.Create;
   with SSL.SSLOptions do
   begin
-    Method:=SslvSSLv3;
+    Method:=sslvSSLv3;
     Mode:=sslmUnassigned;
     VerifyMode:=[];
     VerifyDepth:=0;
@@ -166,8 +166,8 @@ procedure TYaDisk.Get(FileName: String);
 var
   Stream:TStream;
 begin
-  Stream:=TFileStream.Create(Filename,fmcreate);
-  Http.Get(YaURL+Filename,stream);
+  Stream:=TFileStream.Create(Filename,fmCreate);
+  Http.Get(YaURL+Filename,Stream);
   Stream.Free;
 end;
 
@@ -221,7 +221,7 @@ var
       Accept:=  '*/*';
       CustomHeaders.AddValue('Depth','0');
     end;
-  Answer:=http.Prop(Id_HTTPMethodPropFind,YaURL,Stream);
+  Answer:=Http.Prop(Id_HTTPMethodPropFind,YaURL,Stream);
   Reg:= TRegex.Create('[\d]{6,}');
   if reg.IsMatch(Answer) then
     Used:=Reg.Matches(Answer).Item[0].Value;
@@ -308,7 +308,7 @@ var
     end;
   Answer:=Http.Prop(Id_HTTPMethodPropFind,YaURL+FileName,Stream);
   Res:= Regex(Answer,'OK');
-  if Res='' then
+  if Res=String.Empty then
     Result:=False
   else
     Result:=True;
