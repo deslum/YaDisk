@@ -175,7 +175,7 @@ end;
 procedure TYaDisk.MkCol(AURL: String);
 begin
   Http.Request.Accept:='*/*';
-  Http.MkCol(YaURL+Aurl);
+  Http.MkCol(YaURL+AUrl);
 end;
 
 procedure TYaDisk.Delete(ObjectName: String);
