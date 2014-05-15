@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Classes, Data.DB, Data.Win.ADODB,idHttp,idSSl,
   IdSSLOpenSSL,IdIOHandler,RegularExpressionsAPI,RegularExpressionsCore,
   RegularExpressionsConsts,RegularExpressions,idGlobalProtocols,idGlobal,
-  vcl.dialogs;
+  Vcl.Dialogs;
 
 
 type
