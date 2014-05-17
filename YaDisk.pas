@@ -5,8 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, Data.DB, Data.Win.ADODB,idHttp,idSSl,
   IdSSLOpenSSL,IdIOHandler,RegularExpressionsAPI,RegularExpressionsCore,
-  RegularExpressionsConsts,RegularExpressions,idGlobalProtocols,idGlobal,
-  Vcl.Dialogs;
+  RegularExpressionsConsts,RegularExpressions,idGlobalProtocols,idGlobal;
 
 
 type
