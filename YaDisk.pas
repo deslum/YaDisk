@@ -126,7 +126,7 @@ begin
     end;
   except
     on E : Exception do
-      ShowMessage(E.ClassName+' '+E.Message);
+      writeln(E.ClassName+' '+E.Message);
   end;
 end;
 
